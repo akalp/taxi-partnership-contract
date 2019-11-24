@@ -1,16 +1,15 @@
 pragma solidity ^0.5.0;
 
 contract TaxiPartnership {
-    uint participationFee;
-
     mapping (address => uint) balances;
 
-    address[] participantAccts;
+    address payable[] participantAccts;
     mapping (address => bool) participantCheck;
 
     address manager;
-    address payable public carDealer;
+    address payable carDealer;
 
+    uint participationFee;
     uint expenseTime; //Time required for expenses
     uint profitDistTime; //Time required for profit distribution
     uint expenseCost;
@@ -22,19 +21,27 @@ contract TaxiPartnership {
         mapping (address => bool) voted;
         uint8 positiveVoteCount;
     }
+
     bytes32 ownedCar;
     CarProposal carForSale; //Car which is selled by carDealer
     CarProposal carForRepurchase; //Car which is wanted to buy by carDealer
 
     struct Driver {
-        address addr;
+        address payable addr;
         uint salary;
-        uint nextSalary; //When the next salary will be given to the driver.
+        uint lastSalaryPayment; //When the next salary will be given to the driver.
     }
-    Driver driver;
+    Driver driver; //Driver who works now.
 
-    uint nextExpense; //When the next expense will be paid.
-    uint nextProfitDist; //When to distribute profits.
+    struct DriverProposal {
+        Driver driver;
+        mapping (address => bool) voted;
+        uint8 positiveVoteCount;
+    }
+    DriverProposal driverForHire;
+
+    uint lastExpenseTime; //When the next expense will be paid.
+    uint lastProfitDist; //When to distribute profits.
 
     constructor(uint _participationFee, uint _profitDistTime, uint _expenseTime, uint _expenseCost) public{
         manager = msg.sender;
@@ -42,13 +49,15 @@ contract TaxiPartnership {
         profitDistTime = _profitDistTime;
         expenseTime = _expenseTime;
         expenseCost = _expenseCost;
+        lastExpenseTime = now;
+        lastProfitDist = now;
     }
 
     function join() public payable canJoin{
-        require(participantCheck[msg.sender] == false, "You are already a participant.");
-        require(msg.value >= participationFee, "Participation fee is higher than the money you send.");
-        participantAccts.push(msg.sender);
+        require(!participantCheck[msg.sender], "You are already a participant.");
+        require(msg.value >= participationFee, "Participation fee is higher than the ether you send.");
         participantCheck[msg.sender] = true;
+        participantAccts.push(msg.sender);
     }
 
     function setCarDealer(address payable _carDealer) public onlyManager{
@@ -71,12 +80,15 @@ contract TaxiPartnership {
     }
 
     function purchaseCar() public onlyManager greaterThenHalf(carForSale.positiveVoteCount) validOffer(carForSale.offerValidTime){
+        require(carForSale.id != ownedCar, "You already bought that car.");
+        require(address(this).balance > carForSale.price, "Contract does not have enough ether to buy it.");
         ownedCar = carForSale.id;
         carDealer.transfer(carForSale.price);
         delete carForSale;
     }
 
     function repurchaseCarPropose(bytes32 carId, uint price, uint validTime) public onlyDealer{
+        require(carId == ownedCar, "There is no car with this id.");
         carForRepurchase = CarProposal({
             id: carId,
             price: price,
@@ -93,10 +105,72 @@ contract TaxiPartnership {
 
     function repurchaseCar() public payable onlyDealer greaterThenHalf(carForRepurchase.positiveVoteCount)  validOffer(carForRepurchase.offerValidTime){
         require(msg.value == carForRepurchase.price, "You have to send enough amount to buy.");
+        delete ownedCar;
         delete carForRepurchase;
     }
 
-    //TODO continue from propose driver
+    function proposeDriver(address payable driver_addr, uint salary) public onlyManager{
+        driverForHire = DriverProposal({
+            driver: Driver({addr:driver_addr,salary:salary, lastSalaryPayment:0}),
+            positiveVoteCount: 0
+        });
+    }
+
+    function approveDriver() public onlyParticipants{
+        require(!driverForHire.voted[msg.sender], "You already voted.");
+        driverForHire.voted[msg.sender] = true;
+        driverForHire.positiveVoteCount += 1;
+    }
+
+    function setDriver() public onlyManager greaterThenHalf(driverForHire.positiveVoteCount){
+        driver = driverForHire.driver;
+        driver.lastSalaryPayment = now;
+        delete driverForHire;
+    }
+
+    function fireDriver() public onlyManager{
+        require(driver.addr != address(0x0), "There is no driver to fire.");
+        driver.addr.transfer(driver.salary);
+        delete driver;
+    }
+
+    function getCharge() public payable{}
+
+    function releaseSalary() public onlyManager{
+        require(now > driver.lastSalaryPayment + 4 weeks, "1 month has not passed since the last payment.");
+        driver.lastSalaryPayment = now;
+        balances[driver.addr] += driver.salary;
+    }
+
+    function getSalary() public onlyDriver{
+        require(balances[driver.addr]>0, "You do not have ether in contract.");
+        uint driverBalance = balances[driver.addr];
+        balances[driver.addr] = 0;
+        driver.addr.transfer(driverBalance);
+    }
+
+    function carExpenses() public onlyManager{
+        require(now > lastExpenseTime + expenseTime, "It is not time for car maintenance.");
+        lastExpenseTime = now;
+        carDealer.transfer(expenseCost);
+    }
+
+    function payDividend() public onlyManager{
+        require(now > lastProfitDist + profitDistTime, "It is not time to distribute dividends.");
+        lastProfitDist = now;
+        uint dividend = address(this).balance - (expenseCost + 6 * driver.salary) / participantAccts.length;
+        for(uint8 i; i < participantAccts.length; i++){
+            balances[participantAccts[i]] = dividend;
+        }
+    }
+
+    function getDividend() public onlyParticipants{
+        require(balances[msg.sender] > 0, "You do not have ether in contract.");
+        uint balance = balances[msg.sender];
+        balances[msg.sender] = 0;
+        msg.sender.transfer(balance);
+    }
+
 
     modifier validOffer(uint validTime){require(validTime > now, "Offer expired."); _;}
 
