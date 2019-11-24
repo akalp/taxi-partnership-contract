@@ -20,13 +20,13 @@ contract("TaxiPartnership", (accounts) => {
     });
 
     it("join with less ether", async () => {
-        var balance = web3.eth.getBalance(tp.address);
+        var balance = await web3.eth.getBalance(tp.address);
         try{
             await tp.join({ value: 10e18, from:accounts[participants[0]]});    
         }
         catch(error){
-            var balance2 = web3.eth.getBalance(tp.balance);
-            assert(balance == balance2, "Ether gone.");
+            var balance2 = await web3.eth.getBalance(tp.address);
+            assert(balance === balance2, "Ether gone.");
             assert(error.toString().includes('ether you send'), error.toString());
         }
     });
@@ -34,10 +34,11 @@ contract("TaxiPartnership", (accounts) => {
     it("join", async () => {
         try{
             for(var i=0; i<participants.length; i++){
+                console.log(i);
                 var balance = await web3.eth.getBalance(tp.address);
-                await tp.join({ value: 100e18, from:accounts[i]});
+                await tp.join({ value: 100e18, from:accounts[participants[i]]});
                 var balance2 = await web3.eth.getBalance(tp.address);
-                assert(balance + web3.utils.toWei('100', 'ether') == balance2, "Ether did not transfer to contract.")
+                assert(parseInt(balance) + parseInt(web3.utils.toWei('100', 'ether')) === parseInt(balance2), "Ether did not transfer to contract.")
             }
         }catch(error){
             assert(false, error.toString());
@@ -50,7 +51,7 @@ contract("TaxiPartnership", (accounts) => {
             await tp.join({ value: 100e18, from:accounts[participants[0]]});
         }catch(error){
             balance2 = await web3.eth.getBalance(tp.address);
-            assert(balance == balance2, "Ether gone.")
+            assert(balance === balance2, "Ether gone.")
             assert(error.toString().includes('You are already'), error.toString());
         }
     });
@@ -62,7 +63,7 @@ contract("TaxiPartnership", (accounts) => {
         }
         catch(error){
             var balance2 = await web3.eth.getBalance(tp.address);
-            assert(balance == balance2, "Ether gone.")
+            assert(balance === balance2, "Ether gone.")
             assert(error.toString().includes('Max 9'), error.toString());
         }
     });
@@ -126,7 +127,7 @@ contract("TaxiPartnership", (accounts) => {
     it("purchase car with not enough vote", async () => {
         try{
             for(var i=1; i<4; i++){
-                await tp.approvePurchaseCar({from: accounts[i]});
+                await tp.approvePurchaseCar({from: accounts[participants[i]]});
             }
             await tp.purchaseCar();
         }catch(error){
@@ -137,7 +138,7 @@ contract("TaxiPartnership", (accounts) => {
     it("purchase car with enough vote", async () => {
         try{
             for(var i=4; i<7; i++){
-                await tp.approvePurchaseCar({from: accounts[i]});
+                await tp.approvePurchaseCar({from: accounts[participants[i]]});
             }
             await tp.purchaseCar();
         }catch(error){
