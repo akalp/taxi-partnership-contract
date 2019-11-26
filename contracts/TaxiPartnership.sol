@@ -1,18 +1,18 @@
 pragma solidity ^0.5.0;
 
 contract TaxiPartnership {
-    mapping (address => uint) balances;
+    mapping (address => uint) public balances;
 
-    address payable[] participantAccts;
-    mapping (address => bool) participantCheck;
+    address payable[] public participantAccts;
+    mapping (address => bool) public participantCheck;
 
-    address manager;
-    address payable carDealer;
+    address public manager;
+    address payable public carDealer;
 
-    uint participationFee;
-    uint expenseTime; //Time required for expenses
-    uint profitDistTime; //Time required for profit distribution
-    uint expenseCost;
+    uint public participationFee;
+    uint public expenseTime; //Time required for expenses
+    uint public profitDistTime; //Time required for profit distribution
+    uint public expenseCost;
 
     struct CarProposal {
         bytes32 id;
@@ -22,26 +22,27 @@ contract TaxiPartnership {
         uint8 positiveVoteCount;
     }
 
-    bytes32 ownedCar;
-    CarProposal carForSale; //Car which is selled by carDealer
-    CarProposal carForRepurchase; //Car which is wanted to buy by carDealer
+    bytes32 public ownedCar;
+    CarProposal public carForSale; //Car which is selled by carDealer
+    CarProposal public carForRepurchase; //Car which is wanted to buy by carDealer
 
     struct Driver {
         address payable addr;
         uint salary;
         uint lastSalaryPayment; //When the next salary will be given to the driver.
     }
-    Driver driver; //Driver who works now.
+    Driver public driver; //Driver who works now.
 
     struct DriverProposal {
-        Driver driver;
+        address payable addr;
+        uint salary;
         mapping (address => bool) voted;
         uint8 positiveVoteCount;
     }
-    DriverProposal driverForHire;
+    DriverProposal public driverForHire;
 
-    uint lastExpenseTime; //When the next expense will be paid.
-    uint lastProfitDist; //When to distribute profits.
+    uint public lastExpenseTime; //When the next expense will be paid.
+    uint public lastProfitDist; //When to distribute profits.
 
     constructor(uint _participationFee, uint _profitDistTime, uint _expenseTime, uint _expenseCost) public{
         manager = msg.sender;
@@ -111,7 +112,8 @@ contract TaxiPartnership {
 
     function proposeDriver(address payable driver_addr, uint salary) public onlyManager{
         driverForHire = DriverProposal({
-            driver: Driver({addr:driver_addr,salary:salary, lastSalaryPayment:0}),
+            addr:driver_addr,
+            salary:salary,
             positiveVoteCount: 0
         });
     }
@@ -123,8 +125,12 @@ contract TaxiPartnership {
     }
 
     function setDriver() public onlyManager greaterThenHalf(driverForHire.positiveVoteCount){
-        driver = driverForHire.driver;
-        driver.lastSalaryPayment = now;
+        require(driver.addr == address(0x0), "You already have a driver.");
+        driver = Driver({
+            addr: driverForHire.addr,
+            salary: driverForHire.salary,
+            lastSalaryPayment: now
+        });
         delete driverForHire;
     }
 
@@ -160,7 +166,7 @@ contract TaxiPartnership {
         lastProfitDist = now;
         uint dividend = address(this).balance - (expenseCost + 6 * driver.salary) / participantAccts.length;
         for(uint8 i; i < participantAccts.length; i++){
-            balances[participantAccts[i]] = dividend;
+            balances[participantAccts[i]] += dividend;
         }
     }
 
