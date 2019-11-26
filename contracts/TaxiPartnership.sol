@@ -58,7 +58,7 @@ contract TaxiPartnership {
         require(!participantCheck[msg.sender], "You are already a participant.");
         require(msg.value >= participationFee, "Participation fee is higher than the ether you send.");
         participantCheck[msg.sender] = true;
-        participantAccts.push(msg.sender);
+        participantAccts.push(msg.sender) - 1;
     }
 
     function setCarDealer(address payable _carDealer) public onlyManager{
@@ -183,7 +183,7 @@ contract TaxiPartnership {
     modifier greaterThenHalf(uint8 vote){
         require(vote > participantAccts.length / 2, "Not enough approve votes."); _;}
 
-    modifier canJoin (){require(participantAccts.length < 10, "Max 9 participants are allowed by system."); _;}
+    modifier canJoin (){require(participantAccts.length < 9, "Max 9 participants are allowed by system."); _;}
 
     modifier onlyManager(){require(msg.sender == manager, "Only manager can call this function."); _;}
 
@@ -194,5 +194,12 @@ contract TaxiPartnership {
     modifier onlyParticipants(){require(participantCheck[msg.sender] == true, "Only participants can call this function."); _;}
 
     function () external{}
+
+
+    function getParticipantCount() public view returns(uint){
+        return participantAccts.length;
+    }
+
+    /* TODO: getter for carforsale, carforpurchase, driver, driverproposal  */
 
 }
