@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "dev": "lite-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,7 +20,9 @@
     "url": "https://github.com/akalp/taxi-partnership-contract/issues"
   },
   "homepage": "https://github.com/akalp/taxi-partnership-contract#readme",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "lite-server": "^2.5.4",
     "web3": "^1.2.4"
   }
 }
