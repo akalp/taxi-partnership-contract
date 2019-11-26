@@ -34,7 +34,6 @@ contract("TaxiPartnership", (accounts) => {
     it("join", async () => {
         try{
             for(var i=0; i<participants.length; i++){
-                console.log(i);
                 var balance = await web3.eth.getBalance(tp.address);
                 await tp.join({ value: 100e18, from:accounts[participants[i]]});
                 var balance2 = await web3.eth.getBalance(tp.address);
