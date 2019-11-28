@@ -50,7 +50,6 @@ contract TaxiPartnership {
         profitDistTime = _profitDistTime;
         expenseTime = _expenseTime;
         expenseCost = _expenseCost;
-        lastExpenseTime = now;
         lastProfitDist = now;
     }
 
@@ -84,6 +83,7 @@ contract TaxiPartnership {
         require(carForSale.id != ownedCar, "You already bought that car.");
         require(address(this).balance > carForSale.price, "Contract does not have enough ether to buy it.");
         ownedCar = carForSale.id;
+        lastExpenseTime = now;
         carDealer.transfer(carForSale.price);
         delete carForSale;
     }
@@ -156,6 +156,7 @@ contract TaxiPartnership {
     }
 
     function carExpenses() public onlyManager{
+        require(ownedCar != 0, "You do not have a car.");
         require(now > lastExpenseTime + expenseTime, "It is not time for car maintenance.");
         lastExpenseTime = now;
         carDealer.transfer(expenseCost);
