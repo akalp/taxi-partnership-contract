@@ -8,7 +8,7 @@
   <title>District1 Taxi Partnership</title>
 
   <!-- Bootstrap -->
-  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap.css" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -31,6 +31,43 @@
       <h3>manager</h3>
       <div id="manager"></div>
     </div>
+
+    <div id="carDealer-container">
+      <h3>Car Dealer</h3>
+      <div id="car-dealer"></div>
+      <form id="carsale-from"></form>
+      <form id="carbuy-form"></form>
+      <form id="cardealer-form"></form>
+    </div>
+
+    <div id="driver-container">
+      <div id="driver">
+        <h3>Driver</h3>
+        <div id="driver-addr"></div>
+        <div id="driver-salary"></div>
+        <div id="next-salary"></div>
+        <div id="driver-balance"></div>
+        <button id="driver-get-salary" class="btn btn-success" data-id="0" style="display: none;">Get Salary</button>
+        <button id="driver-release-salary" class="btn btn-default" data-id="0" style="display: none;">Release
+          Salary</button>
+        <button id="fire-driver" class="btn btn-danger" data-id="0" style="display: none;">Fire</button>
+      </div>
+      <div id="driver-proposal">
+        <h3>Driver Proposal</h3>
+        <div id="proposal-addr"></div>
+        <div id="proposal-salary"></div>
+        <button id="proposal-vote" class="btn btn-success" data-id="0" style="display: none;">Vote to Hire</button>
+        <button id="proposal-hire" class="btn btn-default" data-id="0" style="display: none;">Hire</button>
+        <form id="driverproposal-form"></form>
+      </div>
+    </div>
+
+    <div id="participants-container">
+      <h3>participants</h3>
+      <div id="participants"></div>
+      <button class="btn btn-primary" id="btn-join" type="button" data-id="0">Be a participant for <span
+          id="join-price"></span></button>
+    </div>
     <div id="contract-balance-container">
       <h3>Total Ether in Contract</h3>
       <div id="total-ether"></div>
@@ -38,19 +75,51 @@
     <div id="user-balance-container">
       <h3>Your Balance in Contract</h3>
       <div id="user-ether"></div>
+      <button id="get-dividend" class="btn btn-success" data-id="0" style="display: none;">Get Dividend</button>
     </div>
-    <div id="participants-container">
-      <h3>participants</h3>
-      <div id="participants"></div>
+    <div id="dividend-container">
+      <h3>Next Dividend Release</h3>
+      <div id="next-dividend"></div>
     </div>
+    <div id="car-container">
+      <h3>Car</h3>
+      <div id="owned-car">
+        <h4>Owned Car</h4>
+        <div id="car-id"></div>
+        <div id="next-expense"></div>
+        <button class="btn btn-default" id="btn-expense" type="button" data-id="0">Pay Expense</button>
+      </div>
+      <div id="car-proposals">
+        <div id="carsale-proposal" style="display: none;">
+          <h4>Car for Sale</h4>
+          <div id="carsale-id"></div>
+          <div id="carsale-price"></div>
+          <div id="carsale-time"></div>
+          <div id="carsale-vote"></div>
+          <button class="btn btn-default" id="btn-sellcar-vote" type="button" data-id="0" style='display:none;'>Vote to
+            buy!</button>
+          <button class="btn btn-primary" id="btn-sellcar" type="button" data-id="0" style='display:none;'>Sell Car
+            <span id="sell-vote"></span></button>
+        </div>
+        <div id="carbuy-proposal" style="display: none;">
+          <h4>Car for Repurchase</h4>
+          <div id="carbuy-id"></div>
+          <div id="carbuy-price"></div>
+          <div id="carbuy-time"></div>
+          <div id="carbuy-vote"></div>
+          <button class="btn btn-default" id="btn-buycar-vote" type="button" data-id="0" style='display:none;'>Vote to
+            sell!</button>
+          <button class="btn btn-primary" id="btn-buycar" type="button" data-id="0" style='display:none;'>Buy
+            Car <span id="buy-count"></span></button>
 
-    <button class="btn btn-default btn-join" type="button" data-id="0">Join</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <script src="js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="js/bootstrap.bundle.js"></script>
   <script src="js/web3.min.js"></script>
   <script src="js/truffle-contract.js"></script>
   <script src="js/app.js"></script>
