@@ -1,5 +1,8 @@
 pragma solidity ^0.5.0;
 
+/// @title Partnership Contract for Taxi Market
+/// @author Hasan Akalp
+
 contract TaxiPartnership {
     mapping (address => uint) public balances;
 
@@ -86,6 +89,7 @@ contract TaxiPartnership {
         lastExpenseTime = now;
         carDealer.transfer(carForSale.price);
         delete carForSale;
+        clearMapping(0);
     }
 
     function repurchaseCarPropose(bytes32 carId, uint price, uint validTime) public onlyDealer{
@@ -108,6 +112,7 @@ contract TaxiPartnership {
         require(msg.value == carForRepurchase.price, "You have to send enough amount to buy.");
         delete ownedCar;
         delete carForRepurchase;
+        clearMapping(1);
     }
 
     function proposeDriver(address payable driver_addr, uint salary) public onlyManager{
@@ -132,6 +137,7 @@ contract TaxiPartnership {
             lastSalaryPayment: now
         });
         delete driverForHire;
+        clearMapping(2);
     }
 
     function fireDriver() public onlyManager{
@@ -196,11 +202,20 @@ contract TaxiPartnership {
 
     function () external{}
 
+    function clearMapping(uint8 k) private {
+        for(uint8 i = 0; i < participantAccts.length; i++){
+            if(k==0){
+                // carForSale voted
+                delete carForSale.voted[participantAccts[i]];
+            }else if(k==1){
+                // carForRepurchase voted
+                delete carForRepurchase.voted[participantAccts[i]];
+            }else{
+                // driverForHire voted
+                delete driverForHire.voted[participantAccts[i]];
+            }
+        }
 
-    function getParticipantCount() public view returns(uint){
-        return participantAccts.length;
     }
-
-    /* TODO: getter for carforsale, carforpurchase, driver, driverproposal  */
 
 }
