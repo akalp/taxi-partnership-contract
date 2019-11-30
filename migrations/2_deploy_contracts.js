@@ -1,5 +1,5 @@
-const TaxiPartnership = artifacts.require("TaxiPartnership");
+const TaxiBusiness = artifacts.require("TaxiBusiness");
 
 module.exports = function(deployer) {
-  deployer.deploy(TaxiPartnership, (100e18).toString(), 15778800, 15778800, (10e18).toString());
+  deployer.deploy(TaxiBusiness, (100e18).toString(), 15778800, 15778800, (10e18).toString());
 };

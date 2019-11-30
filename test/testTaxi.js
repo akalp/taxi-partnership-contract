@@ -1,8 +1,8 @@
-const TaxiPartnership = artifacts.require("TaxiPartnership")
+const TaxiBusiness = artifacts.require("TaxiBusiness")
 const Web3 = require('web3')
 const web3 = new Web3("http://127.0.0.1:7545")
 
-contract("TaxiPartnership", (accounts) => {
+contract("TaxiBusiness", (accounts) => {
     let tp;
     var manager = 0;
     var participants = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -16,7 +16,7 @@ contract("TaxiPartnership", (accounts) => {
     var driverProposal = { addr: accounts[driver], salary: web3.utils.toWei('2', 'ether') };
 
     beforeEach('setup contract for each test', async function () {
-        tp = await TaxiPartnership.at('0x63Df058fb4A9EdAc13cA3604a80bcfF93300A35e');
+        tp = await TaxiBusiness.at('0x17235a29a53d36094792dc8A178c295826F7faC0');
     });
 
     it("join with less ether", async () => {

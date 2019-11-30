@@ -25,11 +25,11 @@ App = {
   },
 
   initContract: function () {
-    $.getJSON('TaxiPartnership.json', function (data) {
-      var TaxiPartnershipArtifact = data;
-      App.contracts.TaxiPartnership = TruffleContract(TaxiPartnershipArtifact);
+    $.getJSON('TaxiBusiness.json', function (data) {
+      var TaxiBusinessArtifact = data;
+      App.contracts.TaxiBusiness = TruffleContract(TaxiBusinessArtifact);
 
-      App.contracts.TaxiPartnership.setProvider(App.web3Provider);
+      App.contracts.TaxiBusiness.setProvider(App.web3Provider);
 
       return App.getGlobals();
     });
@@ -42,19 +42,19 @@ App = {
   },
 
   getGlobals: async function () {
-    var taxiPartnershipInstance = await App.contracts.TaxiPartnership.deployed();
+    var TaxiBusinessInstance = await App.contracts.TaxiBusiness.deployed();
 
-    await taxiPartnershipInstance.manager.call().then(manager => {
+    await TaxiBusinessInstance.manager.call().then(manager => {
       $('#manager').text(manager);
     }).catch(function (err) {
       console.log(err.message);
     });
 
-    await taxiPartnershipInstance.ownedCar.call().then(async carId => {
+    await TaxiBusinessInstance.ownedCar.call().then(async carId => {
       if (carId == 0) $('#owned-car').text("There is no car.");
       else {
         $('#owned-car').text("Car ID: " + carId);
-        await taxiPartnershipInstance.lastExpenseTime.call().then(time => {
+        await TaxiBusinessInstance.lastExpenseTime.call().then(time => {
           var time = new Date(1000 * lpd);
           time = new Date(time.setMonth(time.getMonth() + 6));
           $('#next-expense').text("Next expense time: " + time);
@@ -62,7 +62,7 @@ App = {
       }
     });
 
-    web3.eth.getBalance(taxiPartnershipInstance.address, (err, balance) => {
+    web3.eth.getBalance(TaxiBusinessInstance.address, (err, balance) => {
       if (err) {
         console.log(err);
       } else {
@@ -72,17 +72,17 @@ App = {
     });
 
     // fill dividend time
-    await taxiPartnershipInstance.lastProfitDist.call().then(lpd => {
+    await TaxiBusinessInstance.lastProfitDist.call().then(lpd => {
       var time = new Date(1000 * lpd);
       time = new Date(time.setMonth(time.getMonth() + 6));
       $('#next-dividend').text(time);
     });
 
     // fill participants
-    await taxiPartnershipInstance.getParticipantCount.call().then(async count => {
+    await TaxiBusinessInstance.getParticipantCount.call().then(async count => {
       $('#participants').empty();
       for (var i = 0; i < count; i++) {
-        var participant = await taxiPartnershipInstance.participantAccts.call(i)
+        var participant = await TaxiBusinessInstance.participantAccts.call(i)
         $('#participants').append('<div>' + participant + '</div>');
       }
 
@@ -94,13 +94,13 @@ App = {
         var account = accounts[0];
 
         // if accout participant
-        await taxiPartnershipInstance.participantCheck.call(account).then(async bool => {
-          $('#user-ether').text(bool ? web3.fromWei(await taxiPartnershipInstance.balances.call(account), 'ether') + " ETH" : "You are not a participant.");
+        await TaxiBusinessInstance.participantCheck.call(account).then(async bool => {
+          $('#user-ether').text(bool ? web3.fromWei(await TaxiBusinessInstance.balances.call(account), 'ether') + " ETH" : "You are not a participant.");
           $('#btn-join').disabled = bool;
           if (bool) {
             $('#btn-join').text('Joined!');
 
-            await taxiPartnershipInstance.carForSale.call().then(test => {
+            await TaxiBusinessInstance.carForSale.call().then(test => {
               if (test[0] != 0 && test[2] != 0 && new Date(test[2]) < Date.now()) {
                 $('#carbuy-proposal').show();
                 $('#carbuy-id').text(test[0]);
@@ -109,7 +109,7 @@ App = {
                 $('#btn-buycar-vote').show();
               }
             });
-            await taxiPartnershipInstance.carForRepurchase.call().then(test => {
+            await TaxiBusinessInstance.carForRepurchase.call().then(test => {
               if (test[0] != 0 && test[2] != 0 && new Date(test[2]) < Date.now()) {
                 $('#carsell-proposal').show();
                 $('#carsell-id').text(test[0]);
@@ -119,7 +119,7 @@ App = {
               }
             });
           } else {
-            await taxiPartnershipInstance.participationFee.call().then(fee => {
+            await TaxiBusinessInstance.participationFee.call().then(fee => {
               fee = web3.fromWei(fee, 'ether') + " ETH";
               $('#join-price').text(fee);
             }).catch(function (err) {
@@ -129,14 +129,14 @@ App = {
         });
 
         // if account manager
-        if (account === await taxiPartnershipInstance.manager.call()) {
+        if (account === await TaxiBusinessInstance.manager.call()) {
           console.log(1)
-          await taxiPartnershipInstance.carForSale.call().then(test => {
+          await TaxiBusinessInstance.carForSale.call().then(test => {
             if (test[0] != 0 && new Date(test[2]) < Date.now())
               $('#btn-buycar').show();
             $('#btn-buycar').text("Vote: " + test[3]);
           });
-          await taxiPartnershipInstance.carForRepurchase.call().then(test => {
+          await TaxiBusinessInstance.carForRepurchase.call().then(test => {
             if (test[0] != 0 && new Date(test[2]) < Date.now())
               $('#btn-sellcar').show();
             $('#btn-sellcar').text("Vote: " + test[3]);
@@ -153,7 +153,7 @@ App = {
   handleJoin: function (event) {
     event.preventDefault();
 
-    var taxiPartnershipInstance;
+    var TaxiBusinessInstance;
 
     web3.eth.getAccounts(function (error, accounts) {
       if (error) {
@@ -162,9 +162,9 @@ App = {
 
       var account = accounts[0];
 
-      App.contracts.TaxiPartnership.deployed().then(function (instance) {
-        taxiPartnershipInstance = instance;
-        return taxiPartnershipInstance.join({ from: account, value: web3.toWei(100, 'ether') });
+      App.contracts.TaxiBusiness.deployed().then(function (instance) {
+        TaxiBusinessInstance = instance;
+        return TaxiBusinessInstance.join({ from: account, value: web3.toWei(100, 'ether') });
       }).then(function (result) {
         return App.getGlobals();
       }).catch(function (err) {

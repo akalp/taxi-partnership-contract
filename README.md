@@ -10,5 +10,3 @@ When deploying contract, you should fill the needed paramaters in order: partici
 * When start contract, first driver have to get enough vote from participants, manager cannot set directly.
 * offerValidTime variable should be a real date like 01.01.2019, not range like 2 weeks. Have to convert them to linux timestamp to use in contract.
 * When proposing anything, contract does not check is there an old proposal.
-
-## Test

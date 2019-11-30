@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 /// @title Partnership Contract for Taxi Market
 /// @author Hasan Akalp
 
-contract TaxiPartnership {
+contract TaxiBusiness {
     mapping (address => uint) public balances;
 
     address payable[] public participantAccts;
