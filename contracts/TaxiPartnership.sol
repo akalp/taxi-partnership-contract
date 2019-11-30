@@ -149,6 +149,7 @@ contract TaxiPartnership {
     function getCharge() public payable{}
 
     function releaseSalary() public onlyManager{
+        require(driver.addr != address(0x0), "There is no driver to pay.");
         require(now > driver.lastSalaryPayment + 4 weeks, "1 month has not passed since the last payment.");
         driver.lastSalaryPayment = now;
         balances[driver.addr] += driver.salary;
@@ -170,8 +171,9 @@ contract TaxiPartnership {
 
     function payDividend() public onlyManager{
         require(now > lastProfitDist + profitDistTime, "It is not time to distribute dividends.");
-        lastProfitDist = now;
         uint dividend = address(this).balance - (expenseCost + 6 * driver.salary) / participantAccts.length;
+        require(dividend > 0, "Not enough ether to pay dividend.");
+        lastProfitDist = now;
         for(uint8 i; i < participantAccts.length; i++){
             balances[participantAccts[i]] += dividend;
         }
